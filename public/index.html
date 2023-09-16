@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Aplicação</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+    <nav>
+        <div class="nav-content">
+            <div class="logo">CES-26</div>
+            <div class="links">
+                <a href="#">Dummy 1</a>
+                <a href="#">Dummy 2</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="login-form">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Entrar</button>
+        </form>
+        <div id="error" class="error"></div>
+    </div>
+
+
+    <div class="content">
+        <div class="left-panel">
+            <div class="upload-area">
+                <form action="/upload" method="post" enctype="multipart/form-data">
+                    <input type="file" name="file" id="file" accept="image/*">
+                    <label for="file">Escolha um arquivo</label>
+                    <span id="selectedFileName">Nenhum arquivo selecionado</span>
+                    <button type="submit">Upload</button>
+                </form>
+            </div>
+            <div class="image-display">
+                <img id="uploadedImage" src="#" alt="Imagem carregada" style="display: none;">
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <button id="loadData">Carregar Dados</button>
+            <p id="result">Clique no botão acima para carregar os dados.</p>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2023 CES-26 - Felipe Spirandelli.</p>
+    </footer>
+
+    <script>
+        document.querySelector('input[type="file"]').addEventListener('change', function () {
+            const selectedFileName = this.files[0].name;
+            document.getElementById('selectedFileName').textContent = selectedFileName;
+        });
+
+
+        document.getElementById('loadData').addEventListener('click', function () {
+            fetch('/dados')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('result').textContent = data.mensagem;
+                });
+        });
+
+        document.querySelector('form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.text())
+                .then(data => {
+                    console.log(data)
+                    if (data.startsWith('/uploads')) {  // Se a resposta for um URL
+                        document.getElementById('uploadedImage').src = data;
+                        document.getElementById('uploadedImage').style.display = 'block';
+                    }
+                });
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Simule a validação do email e senha (substitua por sua lógica real)
+            if (await isValidCredentials(email, password)) {
+                // Lógica para login bem-sucedido (redirecionamento, etc.)
+                alert('Login bem-sucedido!'); // Exemplo: exibir um alerta
+            } else {
+                // Exibir mensagem de erro
+                document.getElementById('error').textContent = 'Email ou senha inválidos';
+            }
+        });
+
+        async function isValidCredentials(email, password) {
+            const response = await fetch('/login', {
+                method: 'post',
+                body: {email, password}
+            })
+            return response.status === 200;
+        }
+
+
+    </script>
+
+</body>
+
+</html>
